@@ -1,0 +1,39 @@
+{
+  "name": "backend-typescript-seed",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "nodemon --exec ts-node ./src/index.ts",
+    "build": "rm -rf ./dist && tsc",
+    "lint": "eslint --fix ./src/**/*.ts",
+    "lint-test": "eslint --fix ./test/**/*.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "helmet": "^4.1.1",
+    "joi": "^17.2.1",
+    "typescript": "^4.0.3"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.8",
+    "@types/joi": "^14.3.4",
+    "@typescript-eslint/eslint-plugin": "^4.4.1",
+    "@typescript-eslint/parser": "^4.4.1",
+    "eslint": "^7.11.0",
+    "eslint-config-airbnb-typescript": "^11.1.0",
+    "eslint-config-airbnb-typescript-prettier": "^3.1.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
+    "eslint-plugin-react": "^7.21.4",
+    "nodemon": "^2.0.5",
+    "prettier": "^2.1.2",
+    "ts-node": "^9.0.0"
+  }
+}
