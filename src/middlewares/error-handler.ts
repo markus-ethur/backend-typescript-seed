@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ErrorHandler } from '../http/error-handler';
+import { ErrorHandler, ReponseStatus } from '../http/error-handler';
 // import { logger } from '../../logger';
 
 export const errorHandlerMiddleware = (
@@ -10,11 +10,12 @@ export const errorHandlerMiddleware = (
 ): void => {
   if (err instanceof ErrorHandler) {
     // logger.warn(err);
-    const { statusCode, message, code, details } = err;
+    const { statusCode, message, code, details, status } = err;
     res.status(statusCode).send({
       code,
       message,
       details,
+      status,
     });
     return next();
   }
@@ -22,6 +23,7 @@ export const errorHandlerMiddleware = (
   res.status(500).send({
     code: 'UNEXPECTED_ERROR',
     message: 'Internal server failure',
+    status: ReponseStatus.ERROR,
   });
 
   return next();

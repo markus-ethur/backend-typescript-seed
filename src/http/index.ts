@@ -4,10 +4,39 @@ import helmet from 'helmet';
 import bodyParser from 'body-parser';
 import { HttpResponse } from './types.d';
 // import {} from '../routes/customer';
-import { NotFoundError } from './error-handler';
+import { NotFoundError, ValidationError } from './error-handler';
 import { errorHandlerMiddleware } from '../middlewares/error-handler';
 
 require('dotenv').config();
+
+export const testeSchema = Joi.object({
+  body: {
+    name: Joi.string().required(),
+    username: Joi.string().required(),
+    emailAddress: Joi.string().email().required(),
+  },
+});
+
+export const validatorMiddleware = (schema: Joi.Schema) => (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+): void => {
+  const validation = schema.validate(req, {
+    abortEarly: false,
+    stripUnknown: true,
+    allowUnknown: true,
+  });
+
+  if (validation.error) {
+    return next(new ValidationError(validation.error.details));
+  }
+
+  Object.assign(req, validation.value);
+
+  return next();
+};
+
 
 export class HttpServer {
   protected app?: express.Application;
@@ -29,6 +58,18 @@ export class HttpServer {
     );
 
     // Routes
+
+    app.post(
+      '/customer',
+      [validatorMiddleware(testeSchema)],
+      (
+        req: express.Request,
+        res: express.Response,
+        next: express.NextFunction
+      ) => {
+        next(new NotFoundError());
+      }
+    );
 
     // Not Found
     app.use(
