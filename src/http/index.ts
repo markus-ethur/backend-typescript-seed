@@ -2,14 +2,13 @@ import Joi from 'joi';
 import express from 'express';
 import helmet from 'helmet';
 import bodyParser from 'body-parser';
+import * as dotenv from 'dotenv';
+import knex from 'knex';
 import { HttpResponse } from './types.d';
 // import {} from '../routes/customer';
 import { NotFoundError, ValidationError } from './error-handler';
-import { errorHandlerMiddleware } from '../middlewares/error-handler';
-import { AppController } from '../controllers/controller';
-import { UserController } from '../controllers/user';
-
-require('dotenv').config();
+import { ErrorHandlerMiddleware } from './middlewares/error-handler';
+import { UserRoutes } from './routes/user';
 
 export const testeSchema = Joi.object({
   body: {
@@ -42,14 +41,15 @@ export const validatorMiddleware = (schema: Joi.Schema) => (
 export class HttpServer {
   protected app?: express.Application;
 
-  protected loadControllers(): AppController[] {
-    return [new UserController()];
-  }
+  public db?: knex;
 
   start(): void {
     if (this.app) {
       return;
     }
+
+    // Load .env
+    dotenv.config();
 
     // Express on :)
     const app = express();
@@ -63,39 +63,7 @@ export class HttpServer {
     );
 
     // Routes
-    this.loadControllers().forEach(controller => {
-      if (!controller.routeConfigs) {
-        return;
-      }
-
-      controller.routeConfigs.forEach(routeConfig => {
-        const fullPath = [controller.path, routeConfig.path].join('');
-        const jobs = [
-          ...routeConfig.middlewares,
-          routeConfig.func.bind(controller),
-        ];
-
-        switch (routeConfig.method) {
-          case 'get':
-            app.get(fullPath, jobs);
-            break;
-          case 'post':
-            app.post(fullPath, jobs);
-            break;
-          case 'put':
-            app.put(fullPath, jobs);
-            break;
-          case 'patch':
-            app.patch(fullPath, jobs);
-            break;
-          case 'delete':
-            app.delete(fullPath, jobs);
-            break;
-          default:
-            break;
-        }
-      });
-    });
+    app.use('/user', UserRoutes);
 
     // Not Found
     app.use(
@@ -109,7 +77,7 @@ export class HttpServer {
       }
     );
 
-    app.use(errorHandlerMiddleware);
+    app.use(ErrorHandlerMiddleware);
     app.listen(process.env.HTTP_PORT);
 
     this.app = app;
