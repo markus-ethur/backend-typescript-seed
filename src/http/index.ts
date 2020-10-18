@@ -6,6 +6,8 @@ import { HttpResponse } from './types.d';
 // import {} from '../routes/customer';
 import { NotFoundError, ValidationError } from './error-handler';
 import { errorHandlerMiddleware } from '../middlewares/error-handler';
+import { AppController } from '../controllers/controller';
+import { UserController } from '../controllers/user';
 
 require('dotenv').config();
 
@@ -37,9 +39,12 @@ export const validatorMiddleware = (schema: Joi.Schema) => (
   return next();
 };
 
-
 export class HttpServer {
   protected app?: express.Application;
+
+  protected loadControllers(): AppController[] {
+    return [new UserController()];
+  }
 
   start(): void {
     if (this.app) {
@@ -58,18 +63,39 @@ export class HttpServer {
     );
 
     // Routes
-
-    app.post(
-      '/customer',
-      [validatorMiddleware(testeSchema)],
-      (
-        req: express.Request,
-        res: express.Response,
-        next: express.NextFunction
-      ) => {
-        next(new NotFoundError());
+    this.loadControllers().forEach(controller => {
+      if (!controller.routeConfigs) {
+        return;
       }
-    );
+
+      controller.routeConfigs.forEach(routeConfig => {
+        const fullPath = [controller.path, routeConfig.path].join('');
+        const jobs = [
+          ...routeConfig.middlewares,
+          routeConfig.func.bind(controller),
+        ];
+
+        switch (routeConfig.method) {
+          case 'get':
+            app.get(fullPath, jobs);
+            break;
+          case 'post':
+            app.post(fullPath, jobs);
+            break;
+          case 'put':
+            app.put(fullPath, jobs);
+            break;
+          case 'patch':
+            app.patch(fullPath, jobs);
+            break;
+          case 'delete':
+            app.delete(fullPath, jobs);
+            break;
+          default:
+            break;
+        }
+      });
+    });
 
     // Not Found
     app.use(
