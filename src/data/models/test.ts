@@ -1,16 +1,17 @@
 import { Column, Table } from '@wwwouter/typed-knex';
+import { Model } from './model';
+
 export type Test = {
   id: number;
   name: string;
 };
 
-export interface TestRow {
-  readonly id: number;
-  readonly name?: string;
-}
-
 @Table('test')
-export class TestModel {
+export class TestModel extends Model<Test> {
+  constructor() {
+    super(TestModel);
+  }
+
   @Column({ primary: true })
   public id!: number;
 
