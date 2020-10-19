@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@wwwouter/typed-knex": "^2.18.1",
     "body-parser": "^1.19.0",
     "class-validator": "^0.12.2",
     "dotenv": "^8.2.0",
